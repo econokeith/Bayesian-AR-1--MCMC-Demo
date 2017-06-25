@@ -60,7 +60,7 @@ def calc_q_star(data, phi):
     return q1+ qs.sum()
 
 
-def fit_t_dist(data, plot=False, x_range=None, num=100):
+def fit_t_dist(data, plot=False, x_range=None, num=100,label=""):
     """
     Fits data to t distribution. If plot is True it will return a plot. Otherwise it will return
     a scipy function.
@@ -86,9 +86,9 @@ def fit_t_dist(data, plot=False, x_range=None, num=100):
             x_max = x_range[1]
 
         xs = np.linspace(x_min, x_max, num=num)
-        plt.plot(xs, t_dist.pdf(xs))
+        plt.plot(xs, t_dist.pdf(xs),label=label)
 
-def fit_invgamma_dist(data, plot=False, x_range=None, num=100):
+def fit_invgamma_dist(data, plot=False, x_range=None, num=100,label=""):
     """
     Fits data to inverse gamma distribution. If plot is True it will return a plot. Otherwise it will return
     a scipy function.
@@ -114,7 +114,7 @@ def fit_invgamma_dist(data, plot=False, x_range=None, num=100):
             x_max = x_range[1]
 
         xs = np.linspace(x_min, x_max, num=num)
-        plt.plot(xs, ig_dist.pdf(xs))
+        plt.plot(xs, ig_dist.pdf(xs),label=label)
 
 
 
