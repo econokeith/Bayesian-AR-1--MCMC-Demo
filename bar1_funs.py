@@ -1,49 +1,52 @@
 from __future__ import division
 import numpy as np
-import Quandl as qd
-import pandas as pd
-import scipy as sp
-import numpy.random as npr
 import scipy.stats as sps
-from numpy import array
-from pandas import Series, DataFrame
 import matplotlib.pyplot as plt
-from scipy import stats
-
-import copy
-
-import numpy.linalg as la
-import pandas.io.data as web
-from datetime import datetime
 
 
-def make_test_arma(ar_p, ma_q, dev=100):
+def make_test_arma(ar_p=[], ma_q=[], sig=1,c=0, start=0, N=100, dists=None):
     """
+
     Makes Test ARMA(p,q) data
-    :param ar_p:
-    :param ma_q:
-    :param dev:
+
+    :param ar_p: can either be float or list.
+    :param ma_q: can either be float or list.
+    :param sig: standard dev of error
+    :param c: intercept
+    :param start: starting value
+    :param N: Length of series
+    :param dists: can include disturbances.
     :return:
     """
-    if isinstance(dev, int):
-        errors = np.random.randn(dev)
-    else:
-        errors = dev
+
+
+    if isinstance(ar_p, float) or isinstance(ar_p, int):
+        ar_p = [ar_p]
+
+    if isinstance(ma_q, float) or isinstance(ma_q, int):
+        ma_q = [ma_q]
 
     l_ar = len(ar_p)
     l_ma = len(ma_q)
 
-    z_arma_pq = np.empty(l_ar)
-    z_arma_pq.fill(0)
+
+    if dists:
+        errors=dists
+    else:
+        errors = np.random.randn(N+l_ma)*sig
+
+    arma = np.zeros(l_ar + N)
+    arma[:l_ar] = start
 
     for i in xrange(len(errors) - l_ma):
-        z = np.inner(z_arma_pq[i:i + l_ar], ar_p) + np.inner(errors[i: i + l_ma], ma_q) + errors[i + l_ma]
-        z_arma_pq = np.append(z_arma_pq, z)
+        z = np.inner(arma[i:i + l_ar], ar_p) + np.inner(errors[i: i + l_ma], ma_q) + errors[i + l_ma]
+        arma[i + l_ar] = z
 
-    return z_arma_pq
+    return arma[l_ar:]
 
 
-def q_star_ar1_phi(data, phi):
+
+def calc_q_star(data, phi):
     """
     Calculates Q* given phi
     For gibbs step for variance.
@@ -52,38 +55,9 @@ def q_star_ar1_phi(data, phi):
     :return:
     """
     q1 = data[0] ** 2 * (1 - phi ** 2)
-    for i in xrange(1, len(data)):
-        q1 += (data[i - 1] - phi * data[i])**2
-    return q1
+    qs = (data[1:]- phi * data[:-1])**2
 
-def ar1_mcmc(data, phi0, v0, iterations, c=2):
-
-    data_len = len(data)
-    v_list = [v0]
-    phi_list = [phi0]
-    for i in xrange(iterations):
-
-        v = stats.invgamma.rvs(data_len/2, scale=q_star_ar1_phi(data, phi_list[-1]))
-        v_list.append(v)
-
-        phi_new = np.random.randn(1)[0]* c * v_list[-1] + phi_list[-1]
-        phi_list.append(phi_new)
-
-    return v_list, phi_list
-
-def calc_likelihood(data, phi, v):
-    """
-    calclates the likelihood for hte MC step
-    :param data:
-    :param phi:
-    :param v:
-    :return:
-    """
-    n = len(data)
-    prior = 1/v
-    norm_constant = (1-phi**2)**.5 / (2*np.pi*v)**(n/2)
-    q_star = q_star_ar1_phi(data, phi)
-    return prior * norm_constant * np.exp(-q_star / 2*v)
+    return q1+ qs.sum()
 
 
 def fit_t_dist(data, plot=False, x_range=None, num=100):
