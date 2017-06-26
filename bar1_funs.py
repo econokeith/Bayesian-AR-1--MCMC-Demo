@@ -76,14 +76,14 @@ def fit_t_dist(data, plot=False, x_range=None, num=100,label=""):
     if plot is False:
         return t_dist
 
-    else:
-        if x_range is None:
-            x_min = data.min()
-            x_max = data.max()
 
-        else:
-            x_min = x_range[0]
-            x_max = x_range[1]
+    if x_range is None:
+        x_min = data.min()
+        x_max = data.max()
+
+    else:
+        x_min = x_range[0]
+        x_max = x_range[1]
 
         xs = np.linspace(x_min, x_max, num=num)
         plt.plot(xs, t_dist.pdf(xs),label=label)
@@ -104,14 +104,13 @@ def fit_invgamma_dist(data, plot=False, x_range=None, num=100,label=""):
     if plot is False:
         return ig_dist
 
-    else:
-        if x_range is None:
-            x_min = data.min()
-            x_max = data.max()
+    if x_range is None:
+        x_min = data.min()
+        x_max = data.max()
 
-        else:
-            x_min = x_range[0]
-            x_max = x_range[1]
+    else:
+        x_min = x_range[0]
+        x_max = x_range[1]
 
         xs = np.linspace(x_min, x_max, num=num)
         plt.plot(xs, ig_dist.pdf(xs),label=label)
